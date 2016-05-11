@@ -7,8 +7,17 @@
 //
 
 #import "AppDelegate.h"
+#import "GenresTableViewController.h"
+#import "SongTableViewController.h"
+#import "DatabaseManager.h"
 
 @interface AppDelegate ()
+
+@property (nonatomic, strong) UINavigationController *genresNavigationController;
+@property (nonatomic, strong) UINavigationController *songNavigationController;
+@property (nonatomic, strong) GenresTableViewController *genresTableViewController;
+@property (nonatomic, strong) SongTableViewController *songTableViewController;
+@property (nonatomic, strong) UITabBarController *tabbarController;
 
 @end
 
@@ -17,6 +26,45 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+    
+    //create instance of databasemanager
+    [DatabaseManager shareInstance];
+    
+    self.genresTableViewController = [[GenresTableViewController alloc] initWithNibName:@"GenresTableViewController" bundle:nil];
+    self.genresNavigationController = [[UINavigationController alloc] initWithRootViewController:self.genresTableViewController];
+    self.genresTableViewController.title = @"Navigation Genres";
+    self.genresTableViewController.tabBarItem.title = @"Genres";
+    self.genresTableViewController.tabBarItem.image = [UIImage imageNamed:@"icon_tab_genres.png"];
+    
+    self.songTableViewController = [[SongTableViewController alloc] initWithNibName:@"SongTableViewController" bundle:nil];
+    self.songNavigationController = [[UINavigationController alloc] initWithRootViewController:self.songTableViewController];
+    self.songTableViewController.title = @"Navigation Song";
+    self.songTableViewController.tabBarItem.title = @"Song";
+    self.songTableViewController.tabBarItem.image = [UIImage imageNamed:@"icon_tab_download.png"];
+    
+    
+    /*
+    lấy tabbar từ storyboard thông qua UIStoryboard và identifier của tabbarController(identifier từ Main.storyboard)
+    tên của storyboard trùng với tên file storyboard (việc này chính xác là tạo ra tabbar mới dựa theo tabbar ở storyboard chứ hoàn toàn không phải là sử dụng lại, vì vậy ta phải setRootView cho window
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    self.tabbarController = [sb instantiateViewControllerWithIdentifier:@"tabbarController"];
+ 
+    có thể dùng method instantiateInitiaViewController để lấy ra tabbar từ story (chỉ khi nào tabbar này là thằng chính sẽ chạy
+    đầu tiên trong storyboard
+    self.tabbarController = [sb instantiateInitialViewController];
+    self.tabbarController.viewControllers = [NSArray arrayWithObjects:self.genresTableViewController, self.songTableViewController, nil];
+    */
+    
+    self.tabbarController = [[UITabBarController alloc] init];
+    
+    [self.tabbarController setViewControllers:@[self.genresNavigationController, self.songNavigationController]];
+    
+    self.genresTableViewController.delegate = self.songTableViewController;
+    self.songTableViewController.delegate = self.genresTableViewController;
+    
+    [self.window setRootViewController:self.tabbarController];
+    [self.window makeKeyAndVisible];
     return YES;
 }
 
